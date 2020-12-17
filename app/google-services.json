@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "111835076140",
+    "project_id": "mohbook-67de3",
+    "storage_bucket": "mohbook-67de3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111835076140:android:5ff23b6292ed1304b1a389",
+        "android_client_info": {
+          "package_name": "com.example.mohbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111835076140-6aiibitc5rknbkfkk2u5cj9cder31pot.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8xAXVyxjuYYwHYgqN3mSLQIgmrZiRNT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111835076140-6aiibitc5rknbkfkk2u5cj9cder31pot.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
