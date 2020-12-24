@@ -10,7 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mohbook.R
+import com.example.mohbook.data.models.User
 import com.example.mohbook.databinding.FragmentSearchBinding
+import com.example.mohbook.other.Resource
 import com.example.mohbook.other.Status
 import com.example.mohbook.ui.authscreen.recyclerviewadapters.SearchListAdapter
 import com.example.mohbook.ui.mainscreen.viewmodels.SearchViewModel
@@ -44,40 +46,17 @@ class SearchFragment : Fragment() {
         searchViewModel = ViewModelProvider(requireActivity()).get(SearchViewModel::class.java)
 
         searchViewModel.searchState.observe(viewLifecycleOwner, {
-            if (it.status == Status.LOADING) {
-                binding.apply {
-                    searchProgressBar.visibility = View.VISIBLE
-                    recyclerViewList.visibility = View.INVISIBLE
-                }
-            } else if (it.status == Status.ERROR) {
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                    delay(1200L)
-                    binding.searchProgressBar.visibility = View.INVISIBLE
-                    MotionToast.darkToast(
-                        requireActivity(),
-                        "Failed",
-                        it.message!!,
-                        MotionToast.TOAST_ERROR,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(requireContext(), R.font.helvetica_regular)
-                    )
-                }
-
-            } else if (it.status == Status.SUCCESS) {
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                    binding.apply {
-                        searchAdapter.submitList(it.data!!)
-                        delay(900L)
-                        searchProgressBar.visibility = View.INVISIBLE
-                        recyclerViewList.visibility = View.VISIBLE
-                    }
-                }
-            }
+            updateSearchState(it)
         })
 
+        searchViewModel.searchText?.let {
+            binding.userName.editText?.setText(it)
+        }
+
         binding.userName.setEndIconOnClickListener {
-            searchViewModel.searchForUser(binding.userName.editText?.text.toString().trim())
+            val userName = binding.userName.editText?.text.toString().trim()
+            searchViewModel.searchText = userName
+            searchViewModel.searchForUser(userName)
         }
     }
 
@@ -92,6 +71,42 @@ class SearchFragment : Fragment() {
             adapter = searchAdapter
             layoutManager = LinearLayoutManager(requireContext())
             hasFixedSize()
+        }
+    }
+
+    private fun updateSearchState(resource: Resource<List<User>>){
+        when (resource.status) {
+            Status.LOADING -> {
+                binding.apply {
+                    searchProgressBar.visibility = View.VISIBLE
+                    recyclerViewList.visibility = View.INVISIBLE
+                }
+            }
+            Status.ERROR -> {
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    delay(1200L)
+                    binding.searchProgressBar.visibility = View.INVISIBLE
+                    MotionToast.darkToast(
+                        requireActivity(),
+                        "Failed",
+                        resource.message!!,
+                        MotionToast.TOAST_ERROR,
+                        MotionToast.GRAVITY_BOTTOM,
+                        MotionToast.LONG_DURATION,
+                        ResourcesCompat.getFont(requireContext(), R.font.helvetica_regular)
+                    )
+                }
+            }
+            Status.SUCCESS -> {
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    binding.apply {
+                        searchAdapter.submitList(resource.data!!)
+                        delay(900L)
+                        searchProgressBar.visibility = View.INVISIBLE
+                        recyclerViewList.visibility = View.VISIBLE
+                    }
+                }
+            }
         }
     }
 }

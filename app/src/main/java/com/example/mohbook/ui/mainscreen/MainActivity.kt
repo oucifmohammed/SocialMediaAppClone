@@ -1,5 +1,6 @@
 package com.example.mohbook.ui.mainscreen
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.findNavController
@@ -12,6 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
+    @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -27,5 +29,20 @@ class MainActivity : AppCompatActivity() {
 
         //We used this instruction to forbid the "reloading" of the fragments when "re-selecting" theme.
         binding.bottomNavigationView.setOnNavigationItemReselectedListener { /*Do nothing*/ }
+
+        findNavController(R.id.navHostFragment).addOnDestinationChangedListener { controller, destination, arguments ->
+            when(destination.id){
+                R.id.createPostFragment -> {
+                    binding.createPost.isEnabled = false
+                }
+                else -> {
+                    binding.createPost.isEnabled = true
+                }
+            }
+        }
+
+        binding.createPost.setOnClickListener {
+            findNavController(R.id.navHostFragment).navigate(R.id.globalActionToCreatePostFragment)
+        }
     }
 }

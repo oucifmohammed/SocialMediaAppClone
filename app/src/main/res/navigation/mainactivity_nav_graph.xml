@@ -24,5 +24,23 @@
         android:id="@+id/settingsFragment"
         android:name="com.example.mohbook.ui.mainscreen.fragments.SettingsFragment"
         android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_startActivity"
+            app:destination="@id/startActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/createPostFragment"
+        android:name="com.example.mohbook.ui.mainscreen.fragments.PostFragment"
+        android:label="fragment_post"
+        tools:layout="@layout/fragment_post" />
+
+    <action android:id="@+id/globalActionToCreatePostFragment"
+        app:destination="@id/createPostFragment" />
+
+    <activity
+        android:id="@+id/startActivity"
+        android:name="com.example.mohbook.ui.authscreen.StartActivity"
+        android:label="activity_start"
+        tools:layout="@layout/activity_start" />
 </navigation>

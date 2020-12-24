@@ -34,4 +34,8 @@ class SettingsViewModel @ViewModelInject constructor(
         val result = mainRepository.updateProfile(userName, description, uri)
         _updateProfileState.value = result
     }
+
+    fun signOut(){
+        mainRepository.singOut()
+    }
 }

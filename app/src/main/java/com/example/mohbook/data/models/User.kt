@@ -6,5 +6,6 @@ data class User(
     val id: String = "",
     val userName: String = "",
     val photoUrl: String = Constants.DEFAULT_USER_IMAGE,
-    val description: String = ""
+    val description: String = "",
+    val posts: MutableList<Post> = mutableListOf()
 )

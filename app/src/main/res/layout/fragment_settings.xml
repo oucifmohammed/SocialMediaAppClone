@@ -7,6 +7,16 @@
     android:background="@color/dark_grey"
     tools:context=".ui.mainscreen.fragments.SettingsFragment">
 
+    <ImageView
+        android:id="@+id/sign_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/sign_out"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="6dp"
+        android:layout_marginTop="15dp"/>
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -19,19 +29,6 @@
         app:layout_constraintTop_toTopOf="parent"
         android:gravity="center">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:fontFamily="@font/googlesans"
-        android:text="Edit your Profile"
-        android:textColor="@android:color/white"
-        android:textSize="25dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/userImage"
         android:layout_width="125dp"
@@ -41,7 +38,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="35dp"/>
 
         <LinearLayout
             android:focusable="true"

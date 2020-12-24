@@ -11,6 +11,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
 import com.example.mohbook.R
 import com.example.mohbook.data.models.User
@@ -31,7 +32,6 @@ class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
-//    private lateinit var mainViewModel: SettingsViewModel
     private val mainViewModel: SettingsViewModel by viewModels()
     @Inject
     lateinit var glide: RequestManager
@@ -70,49 +70,7 @@ class SettingsFragment : Fragment() {
         })
 
         mainViewModel.updateProfileState.observe(viewLifecycleOwner,{
-            if(it.status == Status.LOADING){
-                binding.apply {
-                    updateButton.isEnabled = false
-                    updateButton.visibility = View.INVISIBLE
-                    updateProgressBar.visibility = View.VISIBLE
-                }
-            }else if(it.status == Status.ERROR){
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                    binding.updateProgressBar.visibility = View.VISIBLE
-                    delay(1200L)
-                    binding.apply {
-                        updateProgressBar.visibility = View.INVISIBLE
-                        updateButton.visibility = View.VISIBLE
-                        updateButton.isEnabled = true
-                    }
-
-                    MotionToast.darkToast(
-                        requireActivity(),
-                        "Failed",
-                        it.message!!,
-                        MotionToast.TOAST_ERROR,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(requireContext(), R.font.helvetica_regular)
-                    )
-                }
-            }else if(it.status == Status.SUCCESS){
-                binding.apply {
-                    updateButton.visibility = View.VISIBLE
-                    updateProgressBar.visibility = View.INVISIBLE
-                    binding.updateButton.isEnabled = false
-                }
-
-                MotionToast.darkToast(
-                    requireActivity(),
-                    "Success",
-                    "Update operation is done successfully",
-                    MotionToast.TOAST_SUCCESS,
-                    MotionToast.GRAVITY_BOTTOM,
-                    MotionToast.LONG_DURATION,
-                    ResourcesCompat.getFont(requireContext(), R.font.helvetica_regular)
-                )
-            }
+            updateAccountOperation(it)
         })
 
         binding.userImage.setOnClickListener {
@@ -131,6 +89,15 @@ class SettingsFragment : Fragment() {
             val userName= binding.userName.editText?.text.toString()
             val description = binding.description.editText?.text.toString()
             mainViewModel.updateProfile(userName,description,currentUri)
+        }
+
+        binding.signOut.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                mainViewModel.signOut()
+                delay(1000L)
+                findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToStartActivity())
+                activity?.finish()
+            }
         }
     }
 
@@ -170,6 +137,56 @@ class SettingsFragment : Fragment() {
                     description.editText?.setText(resource.data?.description)
                     binding.updateButton.isEnabled = false
                 }
+            }
+        }
+    }
+
+    private fun updateAccountOperation(resource: Resource<Any>){
+        when (resource.status) {
+            Status.LOADING -> {
+                binding.apply {
+                    updateButton.isEnabled = false
+                    updateButton.visibility = View.INVISIBLE
+                    updateProgressBar.visibility = View.VISIBLE
+                }
+            }
+            Status.ERROR -> {
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    binding.updateProgressBar.visibility = View.VISIBLE
+                    delay(1200L)
+                    binding.apply {
+                        updateProgressBar.visibility = View.INVISIBLE
+                        updateButton.visibility = View.VISIBLE
+                        updateButton.isEnabled = true
+                    }
+
+                    MotionToast.darkToast(
+                        requireActivity(),
+                        "Failed",
+                        resource.message!!,
+                        MotionToast.TOAST_ERROR,
+                        MotionToast.GRAVITY_BOTTOM,
+                        MotionToast.LONG_DURATION,
+                        ResourcesCompat.getFont(requireContext(), R.font.helvetica_regular)
+                    )
+                }
+            }
+            Status.SUCCESS -> {
+                binding.apply {
+                    updateButton.visibility = View.VISIBLE
+                    updateProgressBar.visibility = View.INVISIBLE
+                    binding.updateButton.isEnabled = false
+                }
+
+                MotionToast.darkToast(
+                    requireActivity(),
+                    "Success",
+                    "Update operation is done successfully",
+                    MotionToast.TOAST_SUCCESS,
+                    MotionToast.GRAVITY_BOTTOM,
+                    MotionToast.LONG_DURATION,
+                    ResourcesCompat.getFont(requireContext(), R.font.helvetica_regular)
+                )
             }
         }
     }

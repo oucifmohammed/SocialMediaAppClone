@@ -2,12 +2,14 @@ package com.example.mohbook.data.repositories
 
 import android.content.Context
 import android.net.Uri
+import com.example.mohbook.data.models.Post
 import com.example.mohbook.data.models.User
 import com.example.mohbook.other.Constants.DEFAULT_USER_IMAGE
 import com.example.mohbook.other.Event
 import com.example.mohbook.other.Operators
 import com.example.mohbook.other.Resource
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -21,6 +23,8 @@ class MainRepository @Inject constructor(
 ) {
 
     private val users = Firebase.firestore.collection("users")
+    private val posts = Firebase.firestore.collection("posts")
+
     private val auth = FirebaseAuth.getInstance()
     private val storage = Firebase.storage
 
@@ -41,15 +45,16 @@ class MainRepository @Inject constructor(
         }
     }
 
-    suspend fun updateProfilePicture(userId: String, uri: Uri) = withContext(Dispatchers.IO) {
-        val user = users.document(userId).get().await().toObject(User::class.java)
-        if (user?.photoUrl != DEFAULT_USER_IMAGE) {
-            storage.getReferenceFromUrl(user?.photoUrl!!).delete().await()
-        }
+    private suspend fun updateProfilePicture(userId: String, uri: Uri) =
+        withContext(Dispatchers.IO) {
+            val user = users.document(userId).get().await().toObject(User::class.java)
+            if (user?.photoUrl != DEFAULT_USER_IMAGE) {
+                storage.getReferenceFromUrl(user?.photoUrl!!).delete().await()
+            }
 
-        storage.reference.child("userImages/${user.id}").putFile(uri)
-            .await().metadata?.reference?.downloadUrl?.await()
-    }
+            storage.reference.child("userImages/${user.id}").putFile(uri)
+                .await().metadata?.reference?.downloadUrl?.await()
+        }
 
     suspend fun updateProfile(userName: String, description: String, uri: Uri?): Resource<Any> {
 
@@ -94,7 +99,7 @@ class MainRepository @Inject constructor(
                 withContext(Dispatchers.IO) {
                     val querySnapshot =
                         users.whereGreaterThanOrEqualTo("userName", userName)
-                            .whereLessThanOrEqualTo("userName",userName+ '\uf8ff').get().await()
+                            .whereLessThanOrEqualTo("userName", userName + '\uf8ff').get().await()
 
                     if (!querySnapshot.isEmpty) {
                         withContext(Dispatchers.Default) {
@@ -113,5 +118,9 @@ class MainRepository @Inject constructor(
             }
         }
 
+    }
+
+    fun singOut(){
+        auth.signOut()
     }
 }
