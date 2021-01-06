@@ -9,7 +9,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.mohbook.R
@@ -21,7 +20,6 @@ import com.example.mohbook.other.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.mohbook.other.Constants.NOTIFICATION_ID
 import com.example.mohbook.other.Operators
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -40,7 +38,7 @@ class AddPostService : Service() {
     @Inject
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
 
-    lateinit var currentNotificationBuilder: NotificationCompat.Builder
+    private var currentNotificationBuilder: NotificationCompat.Builder? = null
 
     @Inject
     lateinit var pendingIntent: PendingIntent
@@ -58,8 +56,8 @@ class AddPostService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
 
-        if (intent?.action.equals("Stop Service")) {
-            stopSelf(startId)
+        if (intent != null && intent.getIntExtra("key",1)==0) {
+            stopSelf()
         } else {
             val description = intent?.getStringExtra("desc")
             val uri = intent?.let {
@@ -92,12 +90,12 @@ class AddPostService : Service() {
         if (!Operators.checkForInternetConnection(this)) {
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1200L)
-                currentNotificationBuilder
+                currentNotificationBuilder!!
                     .setContentText("The upload operation has failed")
                     .setSmallIcon(R.drawable.upload_fail)
                     .setContentIntent(pendingIntent)
 
-                notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder.build())
+                notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder!!.build())
                 stopForeground(false)
             }
         } else {
@@ -112,12 +110,12 @@ class AddPostService : Service() {
                         .putFile(uri)
                         .addOnProgressListener {
                             val progress = (100 * it.bytesTransferred) / it.totalByteCount
-                            currentNotificationBuilder
+                            currentNotificationBuilder!!
                                 .setProgress(MAX_PROGRESS_BAR_VALUE, progress.toInt(), false)
 
                             notificationManager.notify(
                                 NOTIFICATION_ID,
-                                currentNotificationBuilder.build()
+                                currentNotificationBuilder!!.build()
                             )
                         }
                         .addOnSuccessListener {
@@ -126,17 +124,21 @@ class AddPostService : Service() {
                                     it.metadata?.reference?.downloadUrl?.await().toString()
                                 }
 
+                                val postId = UUID.randomUUID().toString()
+
                                 val post = withContext(Dispatchers.Main) {
                                     if (description == null) {
                                         Post(
-                                            id = user!!.id,
+                                            id = postId,
+                                            authorId = user!!.id,
                                             userName = user.userName,
                                             userPhotoUrl = user.photoUrl,
                                             postPhotoUrl = postPhotoUrl
                                         )
                                     } else {
                                         Post(
-                                            id = user!!.id,
+                                            id = postId,
+                                            authorId = user!!.id,
                                             userName = user.userName,
                                             description = description,
                                             userPhotoUrl = user.photoUrl,
@@ -145,38 +147,36 @@ class AddPostService : Service() {
                                     }
                                 }
 
-                                posts.document(user!!.id).set(post).await()
-                                users.document(user.id).update("posts", FieldValue.arrayUnion(post))
-                                    .await()
+                                posts.document(postId).set(post).await()
 
                                 withContext(Dispatchers.Main) {
-                                    currentNotificationBuilder
+                                    currentNotificationBuilder!!
                                         .setContentText("Upload Completed")
                                         .setSmallIcon(R.drawable.upload_done)
                                         .setProgress(0, 0, false)
-                                        .setContentIntent(pendingIntent)
+                                        .setDeleteIntent(pendingIntent)
 
                                     notificationManager.notify(
                                         NOTIFICATION_ID,
-                                        currentNotificationBuilder.build()
+                                        currentNotificationBuilder!!.build()
                                     )
                                     stopForeground(false)
                                 }
                             }
                         }
                         .addOnCanceledListener {
-                            currentNotificationBuilder
+                            currentNotificationBuilder!!
                                 .setContentText("The upload operation has failed")
                                 .setSmallIcon(R.drawable.upload_fail)
-                            notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder.build())
+                            notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder!!.build())
                             stopForeground(false)
                         }
                 }
             } catch (e: Exception) {
-                currentNotificationBuilder
+                currentNotificationBuilder!!
                     .setContentText(e.message!!)
                     .setSmallIcon(R.drawable.upload_fail)
-                notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder.build())
+                notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder!!.build())
                 stopForeground(false)
             }
         }
@@ -193,4 +193,8 @@ class AddPostService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        currentNotificationBuilder = null
+    }
 }

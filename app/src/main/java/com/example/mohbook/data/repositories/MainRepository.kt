@@ -2,6 +2,7 @@ package com.example.mohbook.data.repositories
 
 import android.content.Context
 import android.net.Uri
+import com.example.mohbook.data.models.Comment
 import com.example.mohbook.data.models.Post
 import com.example.mohbook.data.models.User
 import com.example.mohbook.other.Constants.DEFAULT_USER_IMAGE
@@ -16,15 +17,16 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 
 class MainRepository @Inject constructor(
     private val applicationContext: Context
 ) {
 
+    private val fireStore = Firebase.firestore
     private val users = Firebase.firestore.collection("users")
     private val posts = Firebase.firestore.collection("posts")
-
     private val auth = FirebaseAuth.getInstance()
     private val storage = Firebase.storage
 
@@ -56,12 +58,10 @@ class MainRepository @Inject constructor(
                 .await().metadata?.reference?.downloadUrl?.await()
         }
 
-    suspend fun updateProfile(userName: String, description: String, uri: Uri?): Resource<Any> {
+    suspend fun updateProfile(userName: String, description: String?, uri: Uri?): Event<Resource<Any>> {
 
         if (!Operators.checkForInternetConnection(applicationContext)) {
-            return Resource.error("Checkout your internet connection and try again", Any())
-        } else if (userName.isEmpty() || description.isEmpty()) {
-            return Resource.error("You have to fill all the fields", Any())
+            return Event(Resource.error("Checkout your internet connection and try again", Any()))
         } else {
             return try {
 
@@ -69,10 +69,18 @@ class MainRepository @Inject constructor(
                 val imageUrl = uri?.let {
                     updateProfilePicture(userId, it).toString()
                 }
-                val map = mutableMapOf(
-                    "userName" to userName,
-                    "description" to description
-                )
+
+                val map = if (description == null) {
+                    mutableMapOf(
+                        "userName" to userName,
+                    )
+                } else {
+                    mutableMapOf(
+                        "userName" to userName,
+                        "description" to description
+                    )
+                }
+
                 imageUrl?.let {
                     map["photoUrl"] = it
                 }
@@ -80,9 +88,9 @@ class MainRepository @Inject constructor(
                     users.document(userId).update(map.toMap()).await()
                 }
 
-                Resource.success(Any())
+                Event(Resource.success(Any()))
             } catch (e: Exception) {
-                Resource.error(e.message!!, null)
+                Event(Resource.error(e.message!!, null))
             }
         }
 
@@ -120,7 +128,101 @@ class MainRepository @Inject constructor(
 
     }
 
-    fun singOut(){
+    suspend fun getUser(userId: String): Resource<User> {
+
+        if (!Operators.checkForInternetConnection(applicationContext)) {
+            return Resource.error("Checkout your internet connection and try again", null)
+        }
+        //else {
+            return try {
+                withContext(Dispatchers.IO) {
+                    val user = users.document(userId).get().await().toObject(User::class.java)!!
+
+                    if(userId!=auth.uid!!){
+                        val followResult = checkIfYouFollow(userId)
+                        user.following = followResult
+                    }
+
+                    Resource.success(user)
+                }
+            } catch (e: Exception) {
+                Resource.error(e.message!!, null)
+            }
+        //}
+
+    }
+
+    suspend fun toggleLikeButton(post: Post) = withContext(Dispatchers.IO){
+        try {
+            var isLiked = false
+            fireStore.runTransaction { transaction ->
+                val uid = auth.uid!!
+                val postResult = transaction.get(posts.document(post.id))
+                val currentLikes = postResult.toObject(Post::class.java)?.likedBy ?: listOf()
+
+                transaction.update(
+                    posts.document(post.id),
+                    "likedBy",
+                    if(uid in currentLikes) currentLikes - uid else {
+                        isLiked = true
+                        currentLikes + uid
+                    }
+                )
+            }.await()
+            Resource.success(isLiked)
+        }catch (e: Exception){
+            Resource.error(e.message!!,null)
+        }
+    }
+
+    suspend fun followUser(userId: String) = withContext(Dispatchers.IO){
+        try {
+            var follow = false
+            val userDocumentReference = users.document(auth.uid!!)
+
+            val checkResult = checkIfYouFollow(userId)
+
+            if(checkResult){
+                userDocumentReference.update("followsList",FieldValue.arrayRemove(userId)).await()
+                return@withContext Event(Resource.success(follow))
+            }else {
+                follow = true
+                userDocumentReference.update("followsList",FieldValue.arrayUnion(userId)).await()
+                return@withContext Event(Resource.success(follow))
+            }
+
+        }catch (e: Exception){
+            Event(Resource.error(e.message!!,null))
+        }
+    }
+
+    private suspend fun checkIfYouFollow(userId: String) = withContext(Dispatchers.IO){
+        val followsList = users.document(auth.uid!!).get().await().toObject(User::class.java)?.followsList
+
+        userId in followsList!!
+    }
+
+    suspend fun addComment(commentContent: String,postId: String) = withContext(Dispatchers.IO){
+        try {
+            val commentAuthor = users.document(auth.uid!!).get().await().toObject(User::class.java)!!
+            val postReference = posts.document(postId)
+
+            val commentId = UUID.randomUUID().toString()
+            val authorName = commentAuthor.userName
+            val authorPicture = commentAuthor.photoUrl
+
+            val comment = Comment(commentId,commentContent,authorName,authorPicture)
+
+            postReference.update("commentList",FieldValue.arrayUnion(comment)).await()
+
+            Resource.success(Any())
+
+        }catch (e: Exception){
+            Resource.error(e.message!!,null)
+        }
+    }
+
+    fun singOut() {
         auth.signOut()
     }
 }

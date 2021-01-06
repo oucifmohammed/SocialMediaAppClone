@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/dark_grey">
+
+    <ProgressBar
+        android:id="@+id/load_progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/green"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/failMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Posts could not be loaded"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:fontFamily="@font/googlesans"
+        app:layout_constraintTop_toBottomOf="@id/load_progressBar"
+        app:layout_constraintEnd_toEndOf="@id/load_progressBar"
+        app:layout_constraintStart_toStartOf="@id/load_progressBar"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/retryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/green"
+        app:layout_constraintTop_toBottomOf="@+id/failMessage"
+        app:layout_constraintStart_toStartOf="@id/failMessage"
+        app:layout_constraintEnd_toEndOf="@id/failMessage"
+        android:text="retry"
+        android:fontFamily="@font/googlesans"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,8 +9,9 @@
         android:title="Search"
         android:icon="@drawable/search_icon"/>
 
-    <item android:id="@+id/blank"
-        android:title="Blank"/>
+    <item android:id="@+id/createPostFragment"
+        android:title="Post"
+        android:icon="@drawable/add_post_icon"/>
 
     <item android:id="@+id/profileFragment"
         android:title="Profile"

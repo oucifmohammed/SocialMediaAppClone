@@ -3,21 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/transparent"
-    android:layout_marginStart="10dp"
-    android:layout_marginEnd="10dp"
-    android:layout_marginTop="10dp">
+    android:background="@android:color/transparent">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardBackgroundColor="@color/grey"
-        app:cardCornerRadius="20dp">
+        app:cardBackgroundColor="@color/dark_grey"
+       >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="12dp"
+            android:paddingTop="12dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/userPicture"
@@ -48,7 +46,6 @@
                 app:layout_constraintTop_toBottomOf="@id/userPicture"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:background="@android:color/darker_gray"
                 android:layout_marginTop="5dp"/>
 
             <com.google.android.material.textview.MaterialTextView
@@ -56,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="User name"
-                android:textSize="19sp"
+                android:textSize="17sp"
                 android:textColor="@android:color/white"
                 android:fontFamily="@font/googlesans"
                 app:layout_constraintTop_toBottomOf="@id/postImage"
@@ -68,14 +65,14 @@
                 android:id="@+id/postDescription"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:fontFamily="@font/googlesans"
                 android:text="description"
                 android:textColor="@android:color/white"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/userName2"
-                app:layout_constraintTop_toBottomOf="@id/postImage"
+                app:layout_constraintTop_toTopOf="@+id/userName2"
+                app:layout_constraintBottom_toBottomOf="@+id/userName2"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="9dp"/>
 
@@ -83,7 +80,7 @@
                 android:id="@+id/likeIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/like_icon"
+                android:src="@drawable/like_icon_white"
                 app:layout_constraintTop_toBottomOf="@id/userName2"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="10dp"

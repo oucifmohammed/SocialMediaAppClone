@@ -20,8 +20,8 @@ class SettingsViewModel @ViewModelInject constructor(
         MutableLiveData<Event<Resource<com.example.mohbook.data.models.User>>>()
     val userAccount: LiveData<Event<Resource<com.example.mohbook.data.models.User>>> = _userAccount
 
-    private val _updateProfileState = MutableLiveData<Resource<Any>>()
-    val updateProfileState: LiveData<Resource<Any>> = _updateProfileState
+    private val _updateProfileState = MutableLiveData<Event<Resource<Any>>>()
+    val updateProfileState: LiveData<Event<Resource<Any>>> = _updateProfileState
 
     fun loadingUserAccount() = viewModelScope.launch(Dispatchers.Main) {
         _userAccount.value = Event(Resource.loading(null))
@@ -29,8 +29,8 @@ class SettingsViewModel @ViewModelInject constructor(
         _userAccount.value = result
     }
 
-    fun updateProfile(userName: String, description: String, uri: Uri?) = viewModelScope.launch {
-        _updateProfileState.value = Resource.loading(null)
+    fun updateProfile(userName: String, description: String?, uri: Uri?) = viewModelScope.launch {
+        _updateProfileState.value = Event(Resource.loading(null))
         val result = mainRepository.updateProfile(userName, description, uri)
         _updateProfileState.value = result
     }

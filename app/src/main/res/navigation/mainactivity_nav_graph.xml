@@ -14,12 +14,36 @@
         android:id="@+id/profileFragment"
         android:name="com.example.mohbook.ui.mainscreen.fragments.ProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_userPostsFragment"
+            app:destination="@id/userPostsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.example.mohbook.ui.mainscreen.fragments.SearchFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search" >
+
+        <action
+            android:id="@+id/action_searchFragment_to_otherUserProfileFragment"
+            app:destination="@id/otherUserProfileFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_searchFragment_to_profileFragment"
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.mohbook.ui.mainscreen.fragments.SettingsFragment"
@@ -35,12 +59,59 @@
         android:label="fragment_post"
         tools:layout="@layout/fragment_post" />
 
-    <action android:id="@+id/globalActionToCreatePostFragment"
-        app:destination="@id/createPostFragment" />
+    <action
+        android:id="@+id/globalActionToCreatePostFragment"
+        app:destination="@id/createPostFragment"
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right" />
+
+    <action
+        android:id="@+id/globalActionToCommentFragment"
+        app:destination="@+id/commentsFragment"
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right"/>
 
     <activity
         android:id="@+id/startActivity"
         android:name="com.example.mohbook.ui.authscreen.StartActivity"
         android:label="activity_start"
         tools:layout="@layout/activity_start" />
+    <fragment
+        android:id="@+id/userPostsFragment"
+        android:name="com.example.mohbook.ui.mainscreen.fragments.UserFullPostsFragment"
+        android:label="fragment_posts"
+        tools:layout="@layout/fragment_posts" >
+        <argument
+            android:name="listPosition"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/otherUserProfileFragment"
+        android:name="com.example.mohbook.ui.mainscreen.fragments.OtherUserProfileFragment"
+        android:label="OtherUserProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <argument
+            android:name="userId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_otherUserProfileFragment_to_userPostsFragment"
+            app:destination="@id/userPostsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/commentsFragment"
+        android:name="com.example.mohbook.ui.mainscreen.fragments.CommentsFragment"
+        android:label="fragment_comments"
+        tools:layout="@layout/fragment_comments" >
+        <argument
+            android:name="postItem"
+            app:argType="com.example.mohbook.data.models.Post" />
+    </fragment>
 </navigation>

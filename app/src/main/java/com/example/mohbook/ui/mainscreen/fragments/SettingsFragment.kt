@@ -40,7 +40,7 @@ class SettingsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cropActivityResultLauncher = registerForActivityResult(CropActivityResultContract()) {
+        cropActivityResultLauncher = registerForActivityResult(CropActivityResultContract(1,1)) {
             it?.let {
                 currentUri = it
                 binding.userImage.setImageURI(it)
@@ -70,7 +70,9 @@ class SettingsFragment : Fragment() {
         })
 
         mainViewModel.updateProfileState.observe(viewLifecycleOwner,{
-            updateAccountOperation(it)
+            it.getContentIfNotHandled()?.let {
+                updateAccountOperation(it)
+            }
         })
 
         binding.userImage.setOnClickListener {
@@ -108,6 +110,7 @@ class SettingsFragment : Fragment() {
                     loadingProgressBar.visibility = View.VISIBLE
                     linearLayout.visibility = View.INVISIBLE
                     updateButton.visibility = View.INVISIBLE
+                    signOut.visibility = View.INVISIBLE
                 }
             }
             Status.ERROR -> {
@@ -133,6 +136,7 @@ class SettingsFragment : Fragment() {
                     loadingProgressBar.visibility = View.INVISIBLE
                     binding.updateButton.visibility = View.VISIBLE
                     linearLayout.visibility = View.VISIBLE
+                    signOut.visibility = View.VISIBLE
                     userName.editText?.setText(resource.data?.userName)
                     description.editText?.setText(resource.data?.description)
                     binding.updateButton.isEnabled = false

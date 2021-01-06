@@ -1,13 +1,11 @@
-package com.example.mohbook.ui.authscreen.recyclerviewadapters
+package com.example.mohbook.recyclerviewadapters
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
-import com.example.mohbook.R
 import com.example.mohbook.data.models.User
 import com.example.mohbook.databinding.UserSearchItemBinding
 
@@ -53,23 +51,25 @@ class SearchListAdapter(private val interaction: Interaction? = null) :
         differ.submitList(list)
     }
 
-    class SearchItem
+    inner class SearchItem
     constructor(
         private val binding: UserSearchItemBinding,
         private val interaction: Interaction?
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: User) = with(itemView) {
+        init {
             itemView.setOnClickListener {
-                interaction?.onItemSelected(adapterPosition, item)
+                interaction?.onItemSelected(differ.currentList[absoluteAdapterPosition])
             }
+        }
 
+        fun bind(item: User) = with(itemView) {
             binding.userName.text = item.userName
             Glide.with(binding.root).load(item.photoUrl).into(binding.userPicture)
         }
     }
 
     interface Interaction {
-        fun onItemSelected(position: Int, item: User)
+        fun onItemSelected(item: User)
     }
 }

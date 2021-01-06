@@ -39,9 +39,9 @@ object ServiceModule {
         PendingIntent.getService(
             context,
             0,
-            Intent(context, AddPostService::class.java).also {
-                it.action = "Stop Service"
+            Intent(context, AddPostService::class.java).apply {
+                putExtra("key",0)
             },
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
 }
